@@ -3,26 +3,13 @@ import numpy as np
 import os
 
 def load_fashion_mnist_twist(data_path='../data'):
-    """
-    Loads the FashionMNIST Twist dataset from specified CSV files, skipping the header row.
-
-    Args:
-        data_path (str): The relative path to the directory containing the CSV files.
-                         Assumes this function is called from a script/notebook
-                         located one level above 'data' (e.g., in 'notebooks').
-
-    Returns:
-        tuple: A tuple containing (x_train, y_train, x_test, y_test)
-               as NumPy arrays. Returns (None, None, None, None) if
-               files are not found.
-    """
     train_features_path = os.path.join(data_path, 'x_train.csv')
     train_labels_path = os.path.join(data_path, 'y_train.csv')
     test_features_path = os.path.join(data_path, 'x_test.csv')
     test_labels_path = os.path.join(data_path, 'y_test.csv')
 
     try:
-        print("Loading data, skipping header row...") # Added print statement
+        print("Loading data, skipping header row...")
         x_train_df = pd.read_csv(train_features_path, header=None, skiprows=1) # Added skiprows=1
         y_train_df = pd.read_csv(train_labels_path, header=None, skiprows=1)   # Added skiprows=1
         x_test_df = pd.read_csv(test_features_path, header=None, skiprows=1)    # Added skiprows=1
@@ -30,7 +17,7 @@ def load_fashion_mnist_twist(data_path='../data'):
 
         print("Inspecting the dataframes after skipping header")
         print("x_train_df info: ")
-        x_train_df.info() # .info() prints directly, doesn't return string
+        x_train_df.info() 
         print("\ny_train_df info: ")
         y_train_df.info()
         print("\nx_test_df info: ")
@@ -44,7 +31,6 @@ def load_fashion_mnist_twist(data_path='../data'):
         # print("y_test_df describe: ", "\n", y_test_df.describe())
 
 
-        # Convert pandas DataFrames to NumPy arrays
         x_train = x_train_df.values
         y_train = y_train_df.values.ravel() # Flatten label array
         x_test = x_test_df.values
@@ -56,7 +42,6 @@ def load_fashion_mnist_twist(data_path='../data'):
         print(f"  x_test shape: {x_test.shape}")
         print(f"  y_test shape: {y_test.shape}")
 
-        # Check if shapes match expected counts
         expected_train_samples = 60000
         expected_test_samples = 10000
         if x_train.shape[0] == expected_train_samples and \
@@ -108,18 +93,13 @@ def preprocess_data(x_train, x_test, num_classes=5):
         print(f"  x_test reshaped: {x_test_processed.shape}")   # Should be (N, 1, 28, 28)
         print(f"  Pixel values normalized.")
 
-        # Note: Labels (y_train, y_test) will be handled separately as LongTensors (integers)
-
         return x_train_processed, x_test_processed
 
     except Exception as e:
         print(f"An error occurred during preprocessing: {e}")
         return None, None
 
-# Example of how to use these functions (can be run directly for testing)
 if __name__ == '__main__':
-    # Assuming running from within the src directory for this test
-    # Adjust the path accordingly if running from elsewhere
     print("Testing data utilities...")
     x_train_raw, y_train_raw, x_test_raw, y_test_raw = load_fashion_mnist_twist(data_path='../data')
 
