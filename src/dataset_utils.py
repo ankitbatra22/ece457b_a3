@@ -22,14 +22,12 @@ def load_fashion_mnist_twist(data_path='../data'):
     test_labels_path = os.path.join(data_path, 'y_test.csv')
 
     try:
-        # Load data using pandas, explicitly skipping the first (header) row
         print("Loading data, skipping header row...") # Added print statement
         x_train_df = pd.read_csv(train_features_path, header=None, skiprows=1) # Added skiprows=1
         y_train_df = pd.read_csv(train_labels_path, header=None, skiprows=1)   # Added skiprows=1
         x_test_df = pd.read_csv(test_features_path, header=None, skiprows=1)    # Added skiprows=1
         y_test_df = pd.read_csv(test_labels_path, header=None, skiprows=1)     # Added skiprows=1
 
-        # ----- Optional: Keep the inspection print statements if you want -----
         print("Inspecting the dataframes after skipping header")
         print("x_train_df info: ")
         x_train_df.info() # .info() prints directly, doesn't return string
@@ -40,11 +38,10 @@ def load_fashion_mnist_twist(data_path='../data'):
         print("\ny_test_df info: ")
         y_test_df.info()
 
-        # print("x_train_df describe: ", "\n", x_train_df.describe()) # You can keep or remove these
+        # print("x_train_df describe: ", "\n", x_train_df.describe())
         # print("y_train_df describe: ", "\n", y_train_df.describe())
         # print("x_test_df describe: ", "\n", x_test_df.describe())
         # print("y_test_df describe: ", "\n", y_test_df.describe())
-        # ----- End Optional Inspection -----
 
 
         # Convert pandas DataFrames to NumPy arrays
@@ -84,43 +81,34 @@ def load_fashion_mnist_twist(data_path='../data'):
         print(f"An unexpected error occurred during data loading: {e}")
         return None, None, None, None
 
+
+
 def preprocess_data(x_train, x_test, num_classes=5):
-    """
-    Reshapes and normalizes image data. One-hot encodes labels.
 
-    Args:
-        x_train (np.array): Training image features (flattened).
-        x_test (np.array): Test image features (flattened).
-        num_classes (int): The number of unique classes for one-hot encoding.
-
-    Returns:
-        tuple: A tuple containing (x_train_processed, x_test_processed)
-               Processed image data (reshaped, normalized).
-               Returns (None, None) if input is invalid.
-    """
     if x_train is None or x_test is None:
         print("Error: Input data (x_train or x_test) is None.")
         return None, None
 
-    # Reshape images to (num_samples, height, width, channels)
-    # FashionMNIST images are 28x28 grayscale
     img_rows, img_cols = 28, 28
+    num_channels = 1
     try:
-        x_train_reshaped = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)
-        x_test_reshaped = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
-        input_shape = (img_rows, img_cols, 1)
+        # Reshape to (N, H, W) first, then add channel dimension at axis 1 -> (N, C, H, W)
+        x_train_reshaped = x_train.reshape(x_train.shape[0], img_rows, img_cols)
+        x_test_reshaped = x_test.reshape(x_test.shape[0], img_rows, img_cols)
+
+        x_train_reshaped = np.expand_dims(x_train_reshaped, axis=1)
+        x_test_reshaped = np.expand_dims(x_test_reshaped, axis=1)
 
         # Convert data type to float32 and normalize pixel values to [0, 1]
         x_train_processed = x_train_reshaped.astype('float32') / 255.0
         x_test_processed = x_test_reshaped.astype('float32') / 255.0
 
-        print("Data preprocessing completed:")
-        print(f"  x_train reshaped: {x_train_processed.shape}")
-        print(f"  x_test reshaped: {x_test_processed.shape}")
+        print("Data preprocessing completed (PyTorch NCHW format):")
+        print(f"  x_train reshaped: {x_train_processed.shape}") # Should be (N, 1, 28, 28)
+        print(f"  x_test reshaped: {x_test_processed.shape}")   # Should be (N, 1, 28, 28)
         print(f"  Pixel values normalized.")
 
-        # Note: One-hot encoding of labels will be handled separately,
-        #       often just before training, depending on the framework's loss function requirements.
+        # Note: Labels (y_train, y_test) will be handled separately as LongTensors (integers)
 
         return x_train_processed, x_test_processed
 
